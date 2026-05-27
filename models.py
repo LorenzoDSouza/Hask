@@ -1,19 +1,30 @@
 from sqlalchemy     import create_engine, Column, String, Integer, ForeignKey, Boolean, Enum as SQLAlchemyEnum
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.types import ChoiceType
-from enum import Enum
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+DATABASE_URL = (
+    f"postgresql+psycopg://"
+    f"{os.getenv('DB_USER')}:"
+    f"{os.getenv('DB_PASSWORD')}@"
+    f"{os.getenv('DB_HOST')}:"
+    f"{os.getenv('DB_PORT')}/"
+    f"{os.getenv('DB_NAME')}"
+)
 
 #create the connection to the database engine
-db = create_engine()#aqui dentro vai o endereço do banco, se for da aws coloca o link de la e se for local coloca de acordo com o banco
-
+db = create_engine(DATABASE_URL)
 #create the base of the database
-base = declarative_base()
+Base = declarative_base()
 
 #create class the classes/tables of the db
 #users
 #tasks
 
-class User(base):
+class User(Base):
     __tablename__ = "users"
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)
@@ -26,7 +37,7 @@ class User(base):
         self.email = email
         self.password = password
 
-class Task(base):
+class Task(Base):
     __tablename__ = "tasks"
 
     TASK_STATUS = (
