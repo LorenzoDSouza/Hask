@@ -1,7 +1,7 @@
 from sqlalchemy     import create_engine, Column, String, Integer, ForeignKey, Boolean, Enum as SQLAlchemyEnum
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.types import ChoiceType
 from dotenv import load_dotenv
+from enum import Enum
 import os
 
 load_dotenv()
@@ -23,6 +23,10 @@ Base = declarative_base()
 #create class the classes/tables of the db
 #users
 #tasks
+class TaskStatus(str, Enum):
+    TODO = "TODO"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
 
 class User(Base):
     __tablename__ = "users"
@@ -48,7 +52,7 @@ class Task(Base):
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)
     title = Column("title", String, nullable=False)
-    status = Column("status", ChoiceType(choices=TASK_STATUS))
+    status = Column(SQLAlchemyEnum(TaskStatus), nullable=False, default=TaskStatus.TODO)
     user_id = Column("user_id", Integer, ForeignKey("users.id"))
     type = Column("type", String)
 
