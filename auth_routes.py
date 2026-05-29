@@ -1,6 +1,6 @@
-from fastapi import APIRouter
-from models import User, db
-from sqlalchemy.orm import sessionmaker
+from fastapi import APIRouter, Depends
+from models import User
+from dependencies import get_session
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -12,9 +12,7 @@ async def authenticate():
     return {"message": "Authentication in process", "authenticated": False}
 
 @auth_router.post("/create_user")
-async def create_user(email: str, password: str, name: str):
-    Session = sessionmaker(bind=db)
-    session = Session()
+async def create_user(email: str, password: str, name: str, session = Depends(get_session)):
     user = session.query(User).filter(User.email==email).first()
 
     if user:
