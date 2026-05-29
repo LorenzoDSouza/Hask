@@ -3,7 +3,7 @@
 \n python-dotenv -> this package allow python to read variables from the .venv file
 \n will be important to add the steps to add the variables for the db in the .env file that is not in the repositorie (it is in the gitignore) for safety purposes
 \n pip install alembic -> for db migrations
-\n pip3 install fastapi uvicorn sqlalchemy "passlib[bcrypt]" "python-jose[cryptography]" python-dotenv python-multipart
+\n pip3 install fastapi uvicorn sqlalchemy bcrypt==4.0.1 python-jose[cryptography]" python-dotenv python-multipart
 ## References
 \ https://fastapi.tiangolo.com/
 \ Curso de FastAPI da Hashtag Programação: https://www.youtube.com/watch?v=BtIy2aD8k_w&list=PLpdAy0tYrnKy3TvpCT-x7kGqMQ5grk1Xq
