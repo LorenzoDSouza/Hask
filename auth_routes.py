@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from models import User
 from dependencies import get_session
+from main import bcrypt_context
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -18,7 +19,8 @@ async def create_user(email: str, password: str, name: str, session = Depends(ge
     if user:
         return {"message": "Email alredy been used by another user!"}
     else:
-        new_user = User(name, email, password)
+        encrypted_password = bcrypt_context.hash(password)
+        new_user = User(name, email, encrypted_password)
         session.add(new_user)
         session.commit()
         return {"message": "User created succesfully!"}
