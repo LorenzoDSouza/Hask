@@ -21,4 +21,4 @@ async def create_task(task_request: TaskRequest, session: Session = Depends(get_
     session.add(new_task)
     session.commit()
     session.refresh(new_task)
-    return {"Task '{new_task.title}' created succesfully!"}
+    return {"Task '{new_task.title}' created succesfully! New task id: {new_task.id}"}
