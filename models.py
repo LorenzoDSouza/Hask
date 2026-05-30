@@ -44,20 +44,14 @@ class User(Base):
 class Task(Base):
     __tablename__ = "tasks"
 
-    TASK_STATUS = (
-        ("TODO", "TO DO"),
-        ("IN_PROGRESS", "IN PROGRESS"),
-        ("COMPLETED", "COMPLETED")
-    )
-
     id = Column("id", Integer, primary_key=True, autoincrement=True)
     title = Column("title", String, nullable=False)
     status = Column(SQLAlchemyEnum(TaskStatus), nullable=False, default=TaskStatus.TODO)
     user_id = Column("user_id", Integer, ForeignKey("users.id"))
-    type = Column("type", String)
+    category = Column("category", String)
 
-    def __init__(self, title, user_id, type, status="TO_DO"):
+    def __init__(self, title, user_id, category, status=TaskStatus.TODO):
         self.title = title
         self.status = status
-        self. user_id = user_id
-        self.type = type
+        self.user_id = user_id
+        self.category = category

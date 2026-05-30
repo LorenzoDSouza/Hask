@@ -15,14 +15,15 @@ async def authenticate():
     return {"message": "Authentication in process", "authenticated": False}
 
 @auth_router.post("/create_user")
-async def create_user(userRequest: UserRequest, session: Session = Depends(get_session)):
-    user = session.query(User).filter(User.email==userRequest.email).first()
+async def create_user(user_request: UserRequest, session: Session = Depends(get_session)):
+    user = session.query(User).filter(User.email==user_request.email).first()
 
     if user:
         raise HTTPException(status_code=400, details="Email alredy been used by another user!")
     else:
-        encrypted_password = bcrypt_context.hash(userRequest.password)
-        new_user = User(userRequest.name, userRequest.email, encrypted_password)
+        encrypted_password = bcrypt_context.hash(user_request.password)
+        new_user = User(user_request.name, user_request.email, encrypted_password)
         session.add(new_user)
         session.commit()
-        return {"message": "User {ame} with email {email} created succesfully!"}
+        session.refresh(new_user)
+        return {"message": "User {new_user.name} with email {new_user.email} created succesfully!"}
