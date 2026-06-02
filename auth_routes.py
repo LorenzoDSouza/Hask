@@ -18,20 +18,51 @@ async def authenticate():
     """
     return {"message": "Authentication in process", "authenticated": False}
 
-@auth_router.post("/create_user")
+
+
+@auth_router.post("/users")
 async def create_user(user_request: UserRequest, session: Session = Depends(get_session)):
     user = session.query(User).filter(User.email==user_request.email).first()
 
     if user:
         raise HTTPException(status_code=400, details="Email alredy been used by another user!")
-    else:
-        encrypted_password = bcrypt_context.hash(user_request.password)
-        new_user = User(user_request.name, user_request.email, encrypted_password)
-        session.add(new_user)
-        session.commit()
-        session.refresh(new_user)
-        return {"message": "User {new_user.name} with email {new_user.email} created succesfully!"}
     
+    encrypted_password = bcrypt_context.hash(user_request.password)
+    new_user = User(user_request.name, user_request.email, encrypted_password)
+    session.add(new_user)
+    session.commit()
+    session.refresh(new_user)
+
+    return {"message": "User {new_user.name} with email {new_user.email} created successfully!"}
+
+
+
+@auth_router.get("/users/{user_id}")
+async def get_user_by_id(user_id: int, session: Session = Depends(get_session)):
+    user = session.query(User).filter(User.id==user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=400, detail="User not found with id {user_id}!")
+    
+    return user
+
+
+
+@auth_router.delete("/users/{user_id}")
+async def delete_user_by_id(user_id: int, session: Session = Depends(get_session)):
+    user = session.query(User).filter(User.id==user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=400, detail="Couldn't delete user because no user was found with Id {user_id}!")
+
+    session.delete(user)
+    session.commit()
+
+    return {"message": "User deleted successfully!"}
+
+
+
+
 @auth_router.post("/login")
 async def login(login_request: LoginRequest, session: Session = Depends(get_session)):
     user = session.querry(User).filter(User.email==login_request.email).first()
