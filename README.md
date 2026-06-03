@@ -104,3 +104,4 @@ pip install fastapi uvicorn sqlalchemy bcrypt==4.0.1 "python-jose[cryptography]"
 \ https://marcionizzola.medium.com/implementando-o-uso-de-contratos-na-api-65658c529709
 \ https://medium.com/@jeremyalvax/fastapi-backend-architecture-model-controller-service-44e920567699
 \ https://medium.com/@jasonirvine76/best-practices-for-fastapi-and-applying-it-in-real-project-dae7bf456aa9
+\ https://youtu.be/810WAtXbIiQ?si=RAtWPVdkFPMt2zgq
