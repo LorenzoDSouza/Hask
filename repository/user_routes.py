@@ -14,7 +14,7 @@ async def create_user(user_request: UserRequest, session: Session = Depends(get_
     user = session.query(User).filter(User.email==user_request.email).first()
 
     if user:
-        raise HTTPException(status_code=400, details="Email alredy been used by another user!")
+        raise HTTPException(status_code=400, detail="Email alredy been used by another user!")
     
     encrypted_password = bcrypt_context.hash(user_request.password)
     new_user = User(user_request.name, user_request.email, encrypted_password)
@@ -30,7 +30,7 @@ async def get_user_by_id(user_id: int, session: Session = Depends(get_session)):
     user = session.query(User).filter(User.id==user_id).first()
 
     if not user:
-        raise HTTPException(status_code=400, detail="User not found with id {user_id}!")
+        raise HTTPException(status_code=404, detail="User not found with id {user_id}!")
     
     return user
 
