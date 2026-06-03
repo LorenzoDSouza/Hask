@@ -63,6 +63,12 @@ async def delete_user_by_id(user_id: int, session: Session = Depends(get_session
 
 
 
+@auth_router.put("/users/{user_id}")
+async def update_user_by_id(user_id: int, user_request: UserRequest, session: Session = Depends(get_session)):
+    user = session.querry(User).filter(User.email==login_request.email).first()
+
+    
+
 
 @auth_router.post("/login")
 async def login(login_request: LoginRequest, session: Session = Depends(get_session)):
