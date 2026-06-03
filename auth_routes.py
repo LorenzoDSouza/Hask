@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
 def create_token(user_id):
+    
     token = f"sci1909{user_id}"
     return token
 
@@ -25,7 +26,7 @@ async def create_user(user_request: UserRequest, session: Session = Depends(get_
     user = session.query(User).filter(User.email==user_request.email).first()
 
     if user:
-        raise HTTPException(status_code=400, details="Email alredy been used by another user!")
+        raise HTTPException(status_code=404, details="Email alredy been used by another user!")
     
     encrypted_password = bcrypt_context.hash(user_request.password)
     new_user = User(user_request.name, user_request.email, encrypted_password)
@@ -53,7 +54,7 @@ async def delete_user_by_id(user_id: int, session: Session = Depends(get_session
     user = session.query(User).filter(User.id==user_id).first()
 
     if not user:
-        raise HTTPException(status_code=400, detail="Couldn't delete user because no user was found with Id {user_id}!")
+        raise HTTPException(status_code=404, detail="Couldn't delete user because no user was found with Id {user_id}!")
 
     session.delete(user)
     session.commit()
@@ -68,7 +69,7 @@ async def login(login_request: LoginRequest, session: Session = Depends(get_sess
     user = session.querry(User).filter(User.email==login_request.email).first()
 
     if not user:
-        raise HTTPException(status_code=400, detail="User not found with email {login_request.email}!")
+        raise HTTPException(status_code=404, detail="User not found with email {login_request.email}!")
     else:
         access_token = create_token(user.id)
         return {"access_token": access_token,  "token_type" : "Bearer"}
