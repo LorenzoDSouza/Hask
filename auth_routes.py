@@ -12,12 +12,23 @@ def create_token(user_id):
     token = f"sci1909{user_id}"
     return token
 
+def auth_user(email: str, password: str, session: Session = Depends(get_session)):
+    user = session.query(User).filter(User.email==email).first()
+
+    if not user:
+        return False
+    
+    if not bcrypt_context.verify(password, user.password):
+        return False
+
+    return user
+
 @auth_router.get("/")
-async def authenticate():
+async def home():
     """
     This is the standardt authentication route for the API
     """
-    return {"message": "Authentication in process", "authenticated": False}
+    return {"message": "You accessed the standardt auth route", "authenticated": False}
 
 
 
@@ -84,7 +95,7 @@ async def update_user_by_id(user_id: int, user_request: UserRequest, session: Se
 
 @auth_router.post("/login")
 async def login(login_request: LoginRequest, session: Session = Depends(get_session)):
-    user = session.query(User).filter(User.email==login_request.email).first()
+    user = auth_user(login_request.email, login_request.password, session)
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found with email {login_request.email}!")
