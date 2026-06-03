@@ -26,7 +26,7 @@ async def create_user(user_request: UserRequest, session: Session = Depends(get_
     user = session.query(User).filter(User.email==user_request.email).first()
 
     if user:
-        raise HTTPException(status_code=404, details="Email alredy been used by another user!")
+        raise HTTPException(status_code=400, details="Email alredy been used by another user!")
     
     encrypted_password = bcrypt_context.hash(user_request.password)
     new_user = User(user_request.name, user_request.email, encrypted_password)
@@ -65,14 +65,26 @@ async def delete_user_by_id(user_id: int, session: Session = Depends(get_session
 
 @auth_router.put("/users/{user_id}")
 async def update_user_by_id(user_id: int, user_request: UserRequest, session: Session = Depends(get_session)):
-    user = session.querry(User).filter(User.email==login_request.email).first()
+    user = session.query(User).filter(User.id==user_id).first()
 
-    
+    if not user:
+        raise HTTPException(status_code=404, detail="Couldn't delete user because no user was found with Id {user_id}!")
 
+    user.name = user_request.name
+    user.email = user_request.email
+
+    encrypted_password = bcrypt_context.hash(user_request.password)
+
+    user.password = encrypted_password
+
+    session.commit()
+    session.refresh(user)
+
+    return user
 
 @auth_router.post("/login")
 async def login(login_request: LoginRequest, session: Session = Depends(get_session)):
-    user = session.querry(User).filter(User.email==login_request.email).first()
+    user = session.query(User).filter(User.email==login_request.email).first()
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found with email {login_request.email}!")
