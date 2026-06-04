@@ -28,6 +28,18 @@ async def get_user_by_id(user_id: int, task_id: int, session: Session = Depends(
     task = session.query(Task).filter(Task.user_id==user_id & Task.id==task_id).first()
 
     if not task:
-        raise HTTPException(status_code=404, detail="User not found with id {user_id}!")
+        raise HTTPException(status_code=404, detail=f"Task not found with id {task_id}!")
     
     return task
+
+@task_router.delete("/{user_id}/{task_id}")
+async def delete_task_by_id(user_id: int, task_id: int,  session: Session = Depends(get_session)):
+    task = session.query(Task).filter(Task.user_id==user_id & Task.id==task_id).first()
+
+    if not task:
+        raise HTTPException(status_code=404, detail=f"Task not found with id {task_id}!")
+    
+    session.delete(task)
+    session.commit()
+
+    return {"message": "User deleted successfully!"}

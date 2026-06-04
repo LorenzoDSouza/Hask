@@ -28,7 +28,7 @@ async def get_user_by_id(user_id: int, session: Session = Depends(get_session)):
     user = session.query(User).filter(User.id==user_id).first()
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found with id {user_id}!")
+        raise HTTPException(status_code=404, detail=f"User not found with id {user_id}!")
     
     return user
 
