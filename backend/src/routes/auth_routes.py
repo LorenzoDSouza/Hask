@@ -30,7 +30,7 @@ def auth_user(email: str, password: str, session: Session = Depends(get_session)
 
     return user
 
-@auth_router.get("/")
+@auth_router.get("")
 async def home():
     """
     This is the standardt authentication route for the API

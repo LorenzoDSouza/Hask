@@ -46,5 +46,5 @@ export function login(payload: LoginRequest): Promise<LoginResponse> {
 }
 
 export function signup(payload: SignupRequest): Promise<SignupResponse> {
-  return request<SignupResponse>("/users/users", payload)
+  return request<SignupResponse>("/users", payload)
 }

@@ -1,5 +1,5 @@
 from sqlalchemy     import create_engine, Column, String, Integer, ForeignKey, Boolean, Enum as SQLAlchemyEnum
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, deferred
 from dotenv import load_dotenv
 from enum import Enum
 import os
@@ -34,7 +34,7 @@ class User(Base):
     id = Column("id", Integer, primary_key=True, autoincrement=True)
     name = Column("name", String)
     email = Column("email", String, nullable=False, unique=True)
-    password = Column("password", String, nullable=False)
+    password = deferred(Column("password", String, nullable=False))
 
     def __init__(self, name, email, password):
         self.name = name
