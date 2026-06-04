@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 
 user_router = APIRouter(prefix="/users", tags=["users"])
 
-@user_router.post("/users")
+@user_router.post("/")
 async def create_user(user_request: UserRequest, session: Session = Depends(get_session)):
     user = session.query(User).filter(User.email==user_request.email).first()
 
@@ -22,10 +22,10 @@ async def create_user(user_request: UserRequest, session: Session = Depends(get_
     session.commit()
     session.refresh(new_user)
 
-    return {"message": "User {new_user.name} with email {new_user.email} created successfully!"}
+    return {"message": f"User {new_user.name} with email {new_user.email} created successfully!"}
 
 
-@user_router.get("/users/{user_id}")
+@user_router.get("/{user_id}")
 async def get_user_by_id(user_id: int, session: Session = Depends(get_session)):
     user = session.query(User).filter(User.id==user_id).first()
 
@@ -36,12 +36,12 @@ async def get_user_by_id(user_id: int, session: Session = Depends(get_session)):
 
 
 
-@user_router.delete("/users/{user_id}")
+@user_router.delete("/{user_id}")
 async def delete_user_by_id(user_id: int, session: Session = Depends(get_session)):
     user = session.query(User).filter(User.id==user_id).first()
 
     if not user:
-        raise HTTPException(status_code=404, detail="Couldn't delete user because no user was found with Id {user_id}!")
+        raise HTTPException(status_code=404, detail=f"Couldn't delete user because no user was found with Id {user_id}!")
 
     session.delete(user)
     session.commit()
@@ -50,12 +50,12 @@ async def delete_user_by_id(user_id: int, session: Session = Depends(get_session
 
 
 
-@user_router.put("/users/{user_id}")
+@user_router.put("/{user_id}")
 async def update_user_by_id(user_id: int, user_request: UserRequest, session: Session = Depends(get_session)):
     user = session.query(User).filter(User.id==user_id).first()
 
     if not user:
-        raise HTTPException(status_code=404, detail="Couldn't delete user because no user was found with Id {user_id}!")
+        raise HTTPException(status_code=404, detail=f"Couldn't delete user because no user was found with Id {user_id}!")
 
     user.name = user_request.name
     user.email = user_request.email
