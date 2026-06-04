@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from dotenv import load_dotenv
 import os
@@ -10,6 +11,15 @@ ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTE"))
 
 app = FastAPI() #no terminal pra rodar a api: uvicorn main:app --reload
+
+# Allow the Vite frontend (localhost:5173) to call the API from the browser.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

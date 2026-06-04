@@ -11,7 +11,9 @@ auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
 def create_token(user_id):
     expire_date = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    dic_info = {"sub": user_id, "exp_date": expire_date}
+    # JWT claims must be JSON-serializable: `exp` is a Unix timestamp (int) and
+    # `sub` must be a string per the JWT spec.
+    dic_info = {"sub": str(user_id), "exp": int(expire_date.timestamp())}
 
     encoded_jwt = jwt.encode(dic_info, SECRET_KEY, ALGORITHM)
 
