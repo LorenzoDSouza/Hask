@@ -1,3 +1,4 @@
+alembic==1.14.0
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.13.0
@@ -10,6 +11,7 @@ fastapi==0.136.3
 h11==0.16.0
 idna==3.16
 passlib==1.7.4
+psycopg[binary]==3.2.3
 pyasn1==0.6.3
 pycparser==3.0
 pydantic==2.13.4
