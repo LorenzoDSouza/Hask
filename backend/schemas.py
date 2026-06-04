@@ -19,6 +19,16 @@ class TaskRequest(BaseModel):
     class Config:
         from_attributes = True
 
+class UpdateTaskRequest(BaseModel):
+    id: int
+    title: Optional[str]
+    user_id: Optional[int]
+    category: Optional[str]
+    status: Optional[TaskStatus] = TaskStatus.TODO
+    
+    class Config:
+        from_attributes = True
+
 class LoginRequest(BaseModel):
     email: str
     password: str
