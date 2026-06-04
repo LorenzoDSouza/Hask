@@ -1,15 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from models import User
 from dependencies import get_current_user, get_session
-from main import bcrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
+from main import bcrypt_context
 from schemas import UserRequest
 from sqlalchemy.orm import Session
-from jose import jwt, JWTError
-from datetime import datetime, timedelta, timezone
 
 user_router = APIRouter(prefix="/users", tags=["users"])
 
-@user_router.post("")
+@user_router.post("/", status_code=201)
 async def create_user(user_request: UserRequest, session: Session = Depends(get_session)):
     user = session.query(User).filter(User.email==user_request.email).first()
 
@@ -49,7 +47,7 @@ async def get_user_by_id(user_id: int, session: Session = Depends(get_session)):
 
 
 
-@user_router.delete("/{user_id}")
+@user_router.delete("/{user_id}", status_code=204)
 async def delete_user_by_id(user_id: int, session: Session = Depends(get_session)):
     user = session.query(User).filter(User.id==user_id).first()
 
@@ -70,6 +68,11 @@ async def update_user_by_id(user_id: int, user_request: UserRequest, session: Se
     if not user:
         raise HTTPException(status_code=404, detail=f"Couldn't update user because no user was found with Id {user_id}!")
 
+    existing_user = session.query(User).filter(User.email == user_request.email,User.id != user_id).first()
+                     
+    if existing_user:
+        raise HTTPException(status_code=409, detail=f"Email {user_request.email} already in use!")
+    
     user.name = user_request.name
     user.email = user_request.email
 
