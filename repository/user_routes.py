@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 
 user_router = APIRouter(prefix="/users", tags=["users"])
 
-@user_router.post("/")
+@user_router.post("/", status_code=201)
 async def create_user(user_request: UserRequest, session: Session = Depends(get_session)):
     user = session.query(User).filter(User.email==user_request.email).first()
 
@@ -36,7 +36,7 @@ async def get_user_by_id(user_id: int, session: Session = Depends(get_session)):
 
 
 
-@user_router.delete("/{user_id}")
+@user_router.delete("/{user_id}", status_code=204)
 async def delete_user_by_id(user_id: int, session: Session = Depends(get_session)):
     user = session.query(User).filter(User.id==user_id).first()
 
