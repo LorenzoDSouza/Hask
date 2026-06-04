@@ -57,6 +57,11 @@ async def update_user_by_id(user_id: int, user_request: UserRequest, session: Se
     if not user:
         raise HTTPException(status_code=404, detail=f"Couldn't delete user because no user was found with Id {user_id}!")
 
+    existing_user = session.query(User).filter(User.email == user_request.email,User.id != user_id).first()
+                     
+    if existing_user:
+        raise HTTPException(status_code=409, detail=f"Email {user_request.email} already in use!")
+    
     user.name = user_request.name
     user.email = user_request.email
 
