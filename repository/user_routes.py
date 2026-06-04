@@ -1,11 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from models import User
 from dependencies import get_session
-from main import bcrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
+from main import bcrypt_context
 from schemas import UserRequest
 from sqlalchemy.orm import Session
-from jose import jwt, JWTError
-from datetime import datetime, timedelta, timezone
 
 user_router = APIRouter(prefix="/users", tags=["users"])
 
