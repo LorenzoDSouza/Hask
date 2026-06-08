@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from models import User
-from dependencies import get_session
+from dependencies import get_current_user, get_session
 from main import bcrypt_context
 from schemas import UserRequest
 from sqlalchemy.orm import Session
@@ -22,6 +22,19 @@ async def create_user(user_request: UserRequest, session: Session = Depends(get_
 
     return {"message": f"User {new_user.name} with email {new_user.email} created successfully!"}
 
+@user_router.get("")
+async def users(session: Session = Depends(get_session)):
+    """
+    This is the route to list all the users
+    """
+    return session.query(User).all()
+
+@user_router.get("/me")
+async def get_current_user_info(current_user: User = Depends(get_current_user)):
+    """
+    This is the route to get the current logged-in user's information
+    """
+    return current_user
 
 @user_router.get("/{user_id}")
 async def get_user_by_id(user_id: int, session: Session = Depends(get_session)):
@@ -53,7 +66,7 @@ async def update_user_by_id(user_id: int, user_request: UserRequest, session: Se
     user = session.query(User).filter(User.id==user_id).first()
 
     if not user:
-        raise HTTPException(status_code=404, detail=f"Couldn't delete user because no user was found with Id {user_id}!")
+        raise HTTPException(status_code=404, detail=f"Couldn't update user because no user was found with Id {user_id}!")
 
     existing_user = session.query(User).filter(User.email == user_request.email,User.id != user_id).first()
                      
