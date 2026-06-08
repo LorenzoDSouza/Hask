@@ -1,4 +1,6 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import RedirectResponse
 from requests import session
 from src.services.calendar_service import CalendarService
 from models import User
@@ -9,6 +11,8 @@ from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
+
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -87,18 +91,22 @@ async def google_authorize(current_user: User = Depends(get_current_user)):
 async def google_callback(code: str, state: str, session: Session = Depends(get_session)):
     """
     Callback chamado pelo Google apos o consentimento (redirect_uri).
+    Apos salvar as credenciais, redireciona de volta para o frontend.
     """
-    user = get_current_user(token=state, session=session)
+    try:
+        user = get_current_user(token=state, session=session)
 
-    credentials = calendar_service.exchange_code_for_tokens(code)
-    
-    user.google_refresh_token = credentials["refresh_token"]
-    user.calendar_connected = True
-    
-    session.commit()
-    session.refresh(user)
+        credentials = calendar_service.exchange_code_for_tokens(code)
 
-    return {"message": "Google Calendar connected successfully!"}
+        user.google_refresh_token = credentials["refresh_token"]
+        user.calendar_connected = True
+
+        session.commit()
+        session.refresh(user)
+    except Exception:
+        return RedirectResponse(f"{FRONTEND_URL}/?calendar=error")
+
+    return RedirectResponse(f"{FRONTEND_URL}/?calendar=connected")
 
 # FastAPI para criar API Rest com Python
 @auth_router.delete("/google/disconnect")
