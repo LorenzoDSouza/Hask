@@ -1,7 +1,6 @@
 import os
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
-from requests import session
 from src.services.calendar_service import CalendarService
 from models import User
 from dependencies import get_session, get_current_user
@@ -9,7 +8,7 @@ from main import bcrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_
 from schemas import UserRequest, LoginRequest
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
-from jose import jwt, JWTError
+from jose import jwt
 from datetime import datetime, timedelta, timezone
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
@@ -22,11 +21,11 @@ def create_token(user_id):
     expire_date = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     dic_info = {"sub": str(user_id), "exp": int(expire_date.timestamp())}
 
-    encoded_jwt = jwt.encode(dic_info, SECRET_KEY, ALGORITHM)
+    encoded_jwt = jwt.encode(dic_info, SECRET_KEY, algorithm=ALGORITHM)
 
     return encoded_jwt
 
-def auth_user(email: str, password: str, session: Session = Depends(get_session)):
+def auth_user(email: str, password: str, session: Session):
     user = session.query(User).filter(User.email==email).first()
 
     if not user:
@@ -50,22 +49,20 @@ async def login(login_request: LoginRequest, session: Session = Depends(get_sess
     user = auth_user(login_request.email, login_request.password, session)
 
     if not user:
-        raise HTTPException(status_code=404, detail=f"User not found with email {login_request.email}!")
+        raise HTTPException(status_code=401, detail="Invalid credentials!")
     else:
         access_token = create_token(user.id)
-        return {"access_token": access_token,  "token_type" : "Bearer"}
+        return {"access_token": access_token,  "token_type" : "bearer"}
 
+@auth_router.post("/logout")
+async def logout(current_user: User = Depends(get_current_user)):
+    return {"message": f"User {current_user.email} logged out succesfully!"}
 
 @auth_router.post("/token")
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     session: Session = Depends(get_session),
 ):
-    """
-    Endpoint compativel com OAuth2 password flow, usado pelo botao "Authorize"
-    do Swagger (envia form-data com username/password). O campo `username`
-    recebe o email. O frontend continua usando /auth/login (JSON).
-    """
     user = auth_user(form_data.username, form_data.password, session)
 
     if not user:
@@ -75,13 +72,8 @@ async def login_for_access_token(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# ----- Google Calendar OAuth -----
-
 @auth_router.get("/google/authorize")
 async def google_authorize(current_user: User = Depends(get_current_user)):
-    """
-    Inicia o fluxo OAuth do Google para o usuario logado.
-    """
     state = create_token(current_user.id)
     authorization_url = calendar_service.get_authorization_url(state)
     return {"authorization_url": authorization_url}
@@ -89,10 +81,6 @@ async def google_authorize(current_user: User = Depends(get_current_user)):
 
 @auth_router.get("/google/callback")
 async def google_callback(code: str, state: str, session: Session = Depends(get_session)):
-    """
-    Callback chamado pelo Google apos o consentimento (redirect_uri).
-    Apos salvar as credenciais, redireciona de volta para o frontend.
-    """
     try:
         user = get_current_user(token=state, session=session)
 
@@ -108,16 +96,12 @@ async def google_callback(code: str, state: str, session: Session = Depends(get_
 
     return RedirectResponse(f"{FRONTEND_URL}/?calendar=connected")
 
-# FastAPI para criar API Rest com Python
 @auth_router.delete("/google/disconnect")
-async def google_disconnect(
-    current_user: User = Depends(get_current_user),
-    session: Session = Depends(get_session),
-):
-    """
-    Desconecta o Google Calendar do usuario logado.
-    """
+async def google_disconnect(current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     user = session.query(User).filter(User.id==current_user.id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
     user.google_refresh_token = None
     user.calendar_connected = False
