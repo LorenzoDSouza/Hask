@@ -1,9 +1,12 @@
 import { createContext, useContext } from "react"
+import type { Me } from "@/lib/api"
 
 export type AuthContextValue = {
   token: string | null
   isAuthenticated: boolean
+  user: Me | null
   setToken: (token: string) => void
+  refreshUser: () => Promise<void>
   logout: () => void
 }
 
