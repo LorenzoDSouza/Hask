@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from src.services.calendar_service import CalendarService
+from src.services.mail_service import notify_task_created, notify_task_updated, notify_task_deleted
 from models import Task, User
 from dependencies import get_current_user, get_current_user, get_session
 from sqlalchemy.orm import Session
 from schemas import TaskRequest, UpdateTaskRequest
-
 
 task_router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -31,35 +31,41 @@ async def create_task(task_request: TaskRequest, session: Session = Depends(get_
     session.add(new_task)
     session.commit()
     session.refresh(new_task)
+
+    notify_task_created(task_user.name, task_user.email, new_task.title, new_task.category)
+
     return {"message": f"Task '{new_task.title}' created succesfully! New task id: {new_task.id}"}
 
 @task_router.get("/{task_id}")
 async def get_task_by_id(task_id: int, session: Session = Depends(get_session)):    
     task = session.query(Task).filter(Task.id==task_id).first()
-
     if not task:
         raise HTTPException(status_code=404, detail=f"Task not found with id {task_id}!")
-    
     return task
 
 @task_router.delete("/{task_id}")
-async def delete_task_by_id(task_id: int,  session: Session = Depends(get_session)):
+async def delete_task_by_id(task_id: int, session: Session = Depends(get_session)):
     task = session.query(Task).filter(Task.id==task_id).first()
-
     if not task:
         raise HTTPException(status_code=404, detail=f"Task not found with id {task_id}!")
-    
+
+    task_user = session.query(User).filter(User.id == task.user_id).first()
+    task_title = task.title
     session.delete(task)
     session.commit()
+
+    if task_user:
+        notify_task_deleted(task_user.name, task_user.email, task_title)
 
     return {"message": "Task deleted successfully!"}
 
 @task_router.put("/")
 async def update_task(task_request: UpdateTaskRequest, session: Session = Depends(get_session)):
     task = session.query(Task).filter(Task.id==task_request.id).first()
-
     if not task:
         raise HTTPException(status_code=404, detail=f"Couldn't update task because no task was found with Id {task_request.id}!")
+
+    old_status = task.status
 
     if task_request.title is not None:
         task.title = task_request.title
@@ -69,9 +75,8 @@ async def update_task(task_request: UpdateTaskRequest, session: Session = Depend
         task_user = session.query(User).filter(User.id == task_request.user_id).first()
         if not task_user:
             raise HTTPException(status_code=404, detail=f"User not found with id {task_request.user_id}")
-
         task.user_id = task_request.user_id
-        # notificar novo usuario da tarefa via email aqui
+        notify_task_updated(task_user.name, task_user.email, task.title, old_status, task.status, reassigned=True)
     if task_request.category is not None:
         task.category = task_request.category
 
