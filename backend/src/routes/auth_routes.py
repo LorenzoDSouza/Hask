@@ -5,7 +5,7 @@ from src.services.calendar_service import CalendarService
 from models import User
 from dependencies import get_session, get_current_user
 from main import bcrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
-from schemas import UserRequest, LoginRequest
+from schemas import LoginRequest
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt
