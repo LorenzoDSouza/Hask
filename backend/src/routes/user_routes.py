@@ -12,7 +12,7 @@ async def create_user(user_request: UserRequest, session: Session = Depends(get_
     user = session.query(User).filter(User.email==user_request.email).first()
 
     if user:
-        raise HTTPException(status_code=400, detail="Email alredy been used by another user!")
+        raise HTTPException(status_code=409, detail="Email alredy been used by another user!")
     
     encrypted_password = bcrypt_context.hash(user_request.password)
     new_user = User(user_request.name, user_request.email, encrypted_password)
@@ -22,7 +22,7 @@ async def create_user(user_request: UserRequest, session: Session = Depends(get_
 
     return {"message": f"User {new_user.name} with email {new_user.email} created successfully!"}
 
-@user_router.get("")
+@user_router.get("/")
 async def users(session: Session = Depends(get_session)):
     """
     This is the route to list all the users
@@ -56,9 +56,6 @@ async def delete_user_by_id(user_id: int, session: Session = Depends(get_session
 
     session.delete(user)
     session.commit()
-
-    return {"message": "User deleted successfully!"}
-
 
 
 @user_router.put("/{user_id}")
