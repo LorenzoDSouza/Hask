@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
-from src.services.calendar_service import CalendarService
-from src.services.mail_service import notify_task_created, notify_task_updated, notify_task_deleted
+from src.utils.calendar_service import CalendarService
+from src.utils.mail_service import notify_task_created, notify_task_updated, notify_task_deleted
 from models import Task, User
 from dependencies import get_current_user, get_session
 from sqlalchemy.orm import Session
 from schemas import TaskRequest, UpdateTaskRequest
+from services.task_service import TaskService
 
 task_router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -38,10 +39,9 @@ async def create_task(task_request: TaskRequest, session: Session = Depends(get_
 
 @task_router.get("/{task_id}")
 async def get_task_by_id(task_id: int, session: Session = Depends(get_session)):    
-    task = session.query(Task).filter(Task.id==task_id).first()
-    if not task:
-        raise HTTPException(status_code=404, detail=f"Task not found with id {task_id}!")
-    return task
+    task_service = TaskService(session)
+
+    return task_service.get_task_by_id(task_id)
 
 @task_router.delete("/{task_id}")
 async def delete_task_by_id(task_id: int, session: Session = Depends(get_session)):

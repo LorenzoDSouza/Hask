@@ -1,7 +1,7 @@
 import os
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
-from src.services.calendar_service import CalendarService
+from src.utils.calendar_service import CalendarService
 from models import User
 from dependencies import get_session, get_current_user
 from main import bcrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
