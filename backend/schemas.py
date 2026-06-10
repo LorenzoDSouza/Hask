@@ -22,7 +22,6 @@ class TaskRequest(BaseModel):
         from_attributes = True
 
 class UpdateTaskRequest(BaseModel):
-    id: int
     title: Optional[str] = None
     user_id: Optional[int] = None
     category: Optional[str] = None
