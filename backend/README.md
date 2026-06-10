@@ -22,6 +22,10 @@ The fastest way to run the app together with a PostgreSQL database is via Docker
    DB_NAME=hask
    DB_PORT=5432
    DB_HOST=localhost
+
+   # SendGrid
+   SENDGRID_API_KEY=SG.your_key_here
+   EMAIL_FROM=your_verified_email@gmail.com
    ```
 
    > `DB_HOST=localhost` is used when running uvicorn directly on your machine.
@@ -94,6 +98,11 @@ alembic upgrade head
 
 - **python-multipart**  
   Required for handling form data and file uploads in FastAPI.
+
+- **sendgrid==6.11.0**  
+  Used to send transactional email notifications when tasks are created, updated or deleted.  
+  Requires `SENDGRID_API_KEY` and `EMAIL_FROM` in `.env`. If not configured, notifications are logged to the terminal instead.  
+  Get a free API key at [sendgrid.com](https://sendgrid.com) — verify your sender email before use.
 
 ---
 
