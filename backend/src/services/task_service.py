@@ -2,8 +2,8 @@ from fastapi import HTTPException
 from models import Task
 from src.repositories.task_repository import TaskRepository
 from src.repositories.user_repository import UserRepository
-from src.utils.calendar_service import CalendarService
-from src.utils import mail_service as default_mailer
+from src.services.calendar_service import CalendarService
+from src.services import mail_service as default_mailer
 
 
 class TaskService:

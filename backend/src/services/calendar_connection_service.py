@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from src.repositories.user_repository import UserRepository
-from src.utils.calendar_service import CalendarService
+from src.services.calendar_service import CalendarService
 
 
 class CalendarConnectionService:
