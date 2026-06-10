@@ -101,7 +101,10 @@ async function apiFetch<T>(
 }
 
 export function login(payload: LoginRequest): Promise<LoginResponse> {
-  return apiFetch<LoginResponse>("/auth/login", { method: "POST", body: payload })
+  return apiFetch<LoginResponse>("/auth/login", {
+    method: "POST",
+    body: payload,
+  })
 }
 
 export function signup(payload: SignupRequest): Promise<SignupResponse> {
@@ -116,12 +119,18 @@ export function getTasks(): Promise<Task[]> {
   return apiFetch<Task[]>("/tasks", { auth: true })
 }
 
-export function createTask(payload: CreateTaskPayload): Promise<{ message: string }> {
+export function createTask(
+  payload: CreateTaskPayload
+): Promise<{ message: string }> {
   return apiFetch("/tasks/", { method: "POST", body: payload, auth: true })
 }
 
 export function updateTask(payload: UpdateTaskPayload): Promise<Task> {
-  return apiFetch<Task>("/tasks/", { method: "PUT", body: payload, auth: true })
+  return apiFetch<Task>(`/tasks/${payload.id}`, {
+    method: "PUT",
+    body: payload,
+    auth: true,
+  })
 }
 
 export function deleteTask(id: number): Promise<{ message: string }> {
